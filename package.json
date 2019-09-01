@@ -1,0 +1,27 @@
+{
+  "name": "spo_notifs",
+  "version": "1.0.0",
+  "description": "Notifcation subscription for spo dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "spo"
+  ],
+  "author": "Abhishek Datta",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "dotenv": "^8.1.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.13",
+    "@types/request": "^2.48.2",
+    "nodemon": "^1.19.1",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.6.2"
+  }
+}
