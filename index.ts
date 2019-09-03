@@ -1,18 +1,18 @@
+
+require('dotenv').config();
+
 import * as request from 'request';
 import * as cheerio from 'cheerio';
 
 import { DashboardPost } from './interfaces';
+import { MailerConfig } from './mailer';
 
-require('dotenv').config();
+const differ = new (require('text-diff'))();
 
-import * as Diff from 'text-diff';
-const differ = new Diff();
+const adapter = new (require('lowdb/adapters/FileSync'))('db.json');
+const db = require('lowdb')(adapter)
 
-import * as lowdb from 'lowdb';
-import * as FileSync from 'lowdb/adapters/FileSync';
-
-const adapter = new FileSync('db.json')
-const db = lowdb(adapter)
+const mailer = MailerConfig.setup();
 
 // Setting some defaults (required if the db JSON file is empty)
 db.defaults({posts: [] })
@@ -20,7 +20,7 @@ db.defaults({posts: [] })
 
 const request_csrf = request.defaults({ jar: request.jar() })
 
-const login = (req): Promise<void> => {
+const login = (req: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>): Promise<void> => {
     return new Promise((resolve, reject) => {
         console.log('Logging in...');
         req.get({
@@ -48,7 +48,7 @@ const login = (req): Promise<void> => {
     })
 }
 
-const dashboard = (req, retries=3): Promise<DashboardPost[]> => {
+const dashboard = (req: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>, retries=3): Promise<DashboardPost[]> => {
     if (retries === 0) {
         console.log('Retries limit reached.');
         return Promise.reject();
@@ -73,7 +73,7 @@ const dashboard = (req, retries=3): Promise<DashboardPost[]> => {
             $(".panel").each((i, el) => {
                 const news_title = $(el).find('.panel-title > div .col-sm-9').text().trim();
                 const news_date = $(el).find('.panel-title > div .col-sm-3').text().trim();
-                const news_body = $(el).find('.panel-body').html().trim();
+                const news_body = ($(el).find('.panel-body').html() || '').trim();
                 posts.push({
                     title: news_title,
                     date: news_date,
@@ -105,24 +105,19 @@ const onUpdatePost = (oldPost: DashboardPost, newPost: DashboardPost) => {
     }
 
     if (changed) {
-        console.log('Content Update detected in: ' + newPost.title);
+        console.log('Update detected in: ' + newPost.title);
         newPost.title = '[Update] ' + newPost.title;
+        mailer.sendPostNotification(newPost, 'abdatta@iitk.ac.in');
     }
-
-    mailPost(newPost);
 };
 
 const onNewPost = (post: DashboardPost) => {
     console.log('New Post Found:', post.title);
-    mailPost(post);
+    mailer.sendPostNotification(post, 'abdatta@iitk.ac.in');
 };
 
-const mailPost = (post: DashboardPost) => {
-
-}
-
 const checkForUpdate = () => {
-    console.log(`\nChecking for Updates at [${Date()}]\n`);
+    console.log(`\nChecking for Updates at [${Date()}]`);
     // Scraping dashboard for updates
     dashboard(request_csrf)
         .then(posts => {
@@ -153,9 +148,12 @@ const checkForUpdate = () => {
                 onNewPost(post);
             });
             // Print the final verdict of this scraping.
-            console.log(`\nVerdict: ${new_count} new post${new_count-1?'s':''} found. ${update_count} old post${update_count-1?'s':''} updated.\n`)
+            console.log(`Verdict: ${new_count} new post${new_count-1?'s':''} found. ${update_count} old post${update_count-1?'s':''} updated.\n`)
         });
 }
-checkForUpdate();
-// setInterval(checkForUpdate, 60*1000);
 
+checkForUpdate();
+const interval = parseInt(process.env.CHECK_UPDATE_INTERVAL || '');
+if (interval) {
+    setInterval(checkForUpdate, interval);
+}

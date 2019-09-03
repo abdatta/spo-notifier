@@ -1,7 +1,8 @@
 import { Transporter, createTransport, SendMailOptions } from 'nodemailer';
+import { DashboardPost } from './interfaces';
 // import { UserModel } from '../models/user.model';
 
-const SENDER = `"${ process.env.MAIL_SENDER }" <noreply@${ process.env.MAIL_HOST }>`;
+const SENDER = `"${ process.env.MAIL_SENDER }" <notifier@${ process.env.MAIL_HOST }>`;
 const BCC = process.env.MAIL_BCC || '';
 
 export class MailerConfig {
@@ -30,7 +31,7 @@ export class Mailer {
     }
 
     private sendMail(mailOptions: SendMailOptions): Promise<any> {
-        mailOptions.html += this.FOOTER;
+        mailOptions.html = this.HEADER + mailOptions.html + this.FOOTER;
         if (!process.env.MAIL_ENABLED) {
             console.log('Mail would have been sent to ' + mailOptions.to);
             console.log('Mail Payoad: ', JSON.stringify(mailOptions, null, 2));
@@ -49,45 +50,38 @@ export class Mailer {
         });
     }
 
-    // public sendAccountVerficationLink(user: UserModel, IITKuser: string, verifyLink: string, deregisterLink: string): Promise<any> {
-    //     const mailOptions: SendMailOptions = {
-    //         to: user.email,
-    //         from: SENDER,
-    //         bcc: BCC,
-    //         subject: 'Account Verification Link',
-    //         html: `<p>Hi ${ user.name } (${ user.rollno }),</p>` +
-    //               `<p>` +
-    //                 `Thank you for signing up in the Mess Automation Portal, Hall 3. ` +
-    //                 `Please verify your account using the following link:` +
-    //               `</p>` +
-    //               `<p><a href="${ verifyLink }">${ verifyLink }</a></p>` +
-    //               `<p>` +
-    //                 `You were signed up by IITK user: ${ IITKuser }.<br>` +
-    //                 `If you didn't request for this signup, you can deregister your account using ` +
-    //                 `<a href="${ deregisterLink }">this link</a>.` +
-    //               `</p>`
-    //     };
+    public sendPostNotification(post: DashboardPost, to: string): Promise<any> {
+        const mailOptions: SendMailOptions = {
+            to: to,
+            from: SENDER,
+            bcc: BCC,
+            replyTo: BCC,
+            subject: post.title,
+            html: `<p><b><u>${post.title}</u></b> (Posted On: ${post.date})</p>` +
+                  `<p>${post.body}</p>`
+        };
 
-    //     return this.sendMail(mailOptions);
-    // }
+        return this.sendMail(mailOptions);
+    }
+
+    private readonly HEADER = `<html><head>` +
+                                `<style>` +
+                                    `ins { background-color: lightgreen; font-weight: 600; }` +
+                                    `del { background-color: lightpink; font-weight: 600; }` +
+                                `</style>` +
+                               `</head>` +
+                               `<body>`;
 
     private readonly FOOTER = `------` +
                                 `<div style="font: 10px/1.4 Arial,Helvetica,sans-serif;">` +
-                                    `<p>In case of any difficulty or concern, please feel free to contact any one of us.</p>` +  
-                                    `<p>` +
-                                        `Ashish Kumar Singh<br>` +
-                                        `Web-Incharge (Present)<br>` +
-                                        `Hall 3 IIT Kanpur<br>` +
-                                        `<a href="mailto:ashsgh@iitk.ac.in">ashsgh@iitk.ac.in</a> | 8778124118` +
-                                    `</p>` +
-            
+                                    `<p>Regards,<br>SPO Notifier (by Abhishek Datta)</p>` +
                                     `<p>` +
                                         `Abhishek Datta<br>` +
-                                        `Web-Incharge (2017-2018)<br>` +
-                                        `Hall 3 IIT Kanpur<br>` +
+                                        `Final Year, B.Tech (EE)<br>` +
                                         `<a href="mailto:abdatta@iitk.ac.in">abdatta@iitk.ac.in</a> | 7003801867` +
                                     `</p>` +
-                               `</div>`;
+                               `</div>` +
+                              `</body></html>`;
 }
 
 interface MailConfig {
