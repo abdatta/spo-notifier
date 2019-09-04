@@ -1,5 +1,13 @@
-body {
-    padding: 20px;
+nav .nav-wrapper {
+    padding: 0 20px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    margin-top: 18px;
 }
 
 .subscriber {
@@ -14,23 +22,24 @@ body {
     margin: 0 15px;
 }
 
-.dropdown {
-    color: white;
-    border-radius: 50%;
-    padding: 0 9px;
-}
-
-.dropdown > i {
-    margin-top: 2px;
+i.right.dropdown {
+    margin-left: 0;
 }
 
 .row {
     display: flex;
+    flex-flow: column;
     justify-content: center;
+    align-items: center;
 }
 
 .card .card-content .card-title {
     margin-bottom: 0;
+}
+
+.card-parent-content {
+    cursor: pointer;
+
 }
 
 .card .card-content {
@@ -38,8 +47,9 @@ body {
     padding-top: 18px;
 }
 
-#post1 {
-    margin-left: 0;
+.post {
+    width: 100%;
+    max-width: 700px;
 }
 
 #date1 {
@@ -51,10 +61,13 @@ body {
 }
 
 .card .card-action {
-    padding-top: 12px;
+    padding: 12px 24px 16px 24px;
     color: white;
+    display: none;
 }
 
-.card-action > p {
-    margin: 0;
+.card .card-action.expand {
+    padding: 12px 24px 16px 24px;
+    max-height: 600px;
+    transition: max-height 1s ease-in;
 }
