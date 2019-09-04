@@ -16,13 +16,17 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.1.0",
+    "express": "^4.17.1",
     "lowdb": "^1.0.0",
+    "morgan": "^1.9.1",
     "nodemailer": "^6.3.0",
     "request": "^2.88.0",
     "text-diff": "^1.0.1"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.13",
+    "@types/express": "^4.17.1",
+    "@types/morgan": "^1.7.37",
     "@types/nodemailer": "^6.2.1",
     "@types/request": "^2.48.2",
     "copyfiles": "^2.1.1",

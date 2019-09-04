@@ -6,6 +6,9 @@ import * as cheerio from 'cheerio';
 
 import { DashboardPost } from './interfaces';
 import { MailerConfig } from './mailer';
+import { Server } from './server';
+
+const server = new Server(parseInt(process.env.SERVER_PORT!) || 3000);
 
 const differ = new (require('text-diff'))();
 
@@ -152,7 +155,7 @@ const checkForUpdate = () => {
         });
 }
 
-checkForUpdate();
+// checkForUpdate();
 const interval = parseInt(process.env.CHECK_UPDATE_INTERVAL || '');
 if (interval) {
     setInterval(checkForUpdate, interval);
