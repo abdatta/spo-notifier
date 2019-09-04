@@ -8,8 +8,6 @@ import { DashboardPost } from './interfaces';
 import { MailerConfig } from './mailer';
 import { Server } from './server';
 
-const server = new Server(parseInt(process.env.SERVER_PORT!) || 3000);
-
 const differ = new (require('text-diff'))();
 
 const adapter = new (require('lowdb/adapters/FileSync'))('db.json');
@@ -20,6 +18,8 @@ const mailer = MailerConfig.setup();
 // Setting some defaults (required if the db JSON file is empty)
 db.defaults({posts: [] })
   .write();
+
+const server = new Server(parseInt(process.env.SERVER_PORT!) || 3000, db);
 
 const request_csrf = request.defaults({ jar: request.jar() })
 
@@ -155,7 +155,7 @@ const checkForUpdate = () => {
         });
 }
 
-// checkForUpdate();
+checkForUpdate();
 const interval = parseInt(process.env.CHECK_UPDATE_INTERVAL || '');
 if (interval) {
     setInterval(checkForUpdate, interval);

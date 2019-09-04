@@ -4,7 +4,7 @@ import morgan from 'morgan';
 export class Server {
     app: Express;
 
-    constructor(port: number) {
+    constructor(port: number, private db: any) {
         this.app = express();
         this.setupRoutes();
         this.app.listen(port, () =>
@@ -15,7 +15,8 @@ export class Server {
         this.app
             .use(this.httpLogger())
             .use('/', express.static('src/public'))
-            .get('/api', this.apiWelcome);
+            .get('/api', this.apiWelcome)
+            .get('/posts', this.getPosts);
     }
 
     private httpLogger() {
@@ -28,5 +29,9 @@ export class Server {
 
     private apiWelcome = (req: Request, res: Response) => {
         res.send('Welcome to APIs!');
+    }
+
+    private getPosts = (req: Request, res: Response) => {
+        res.send(this.db.get('posts').value());
     }
 }
