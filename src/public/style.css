@@ -1,0 +1,60 @@
+body {
+    padding: 20px;
+}
+
+.subscriber {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#email {
+    width: 70%;
+    max-width: 400px;
+    margin: 0 15px;
+}
+
+.dropdown {
+    color: white;
+    border-radius: 50%;
+    padding: 0 9px;
+}
+
+.dropdown > i {
+    margin-top: 2px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.card .card-content .card-title {
+    margin-bottom: 0;
+}
+
+.card .card-content {
+    padding-bottom: 12px;
+    padding-top: 18px;
+}
+
+#post1 {
+    margin-left: 0;
+}
+
+#date1 {
+    font-size: 10px;
+}
+
+#date1 > i {
+    font-size: 10px;
+}
+
+.card .card-action {
+    padding-top: 12px;
+    color: white;
+}
+
+.card-action > p {
+    margin: 0;
+}
