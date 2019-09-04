@@ -152,7 +152,8 @@ const checkForUpdate = () => {
             });
             // Print the final verdict of this scraping.
             console.log(`Verdict: ${new_count} new post${new_count-1?'s':''} found. ${update_count} old post${update_count-1?'s':''} updated.\n`)
-        });
+        })
+        .catch(error => console.error('Failed to check for updates!', error));
 }
 
 checkForUpdate();
