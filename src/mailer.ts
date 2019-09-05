@@ -32,7 +32,7 @@ export class Mailer {
 
     private sendMail(mailOptions: SendMailOptions): Promise<any> {
         mailOptions.html = this.HEADER + mailOptions.html + this.FOOTER;
-        if (!process.env.MAIL_ENABLED) {
+        if (!(process.env.MAIL_ENABLED === 'true')) {
             console.log('Mail would have been sent to ' + mailOptions.to);
             console.log('Mail Payoad: ', JSON.stringify(mailOptions, null, 2));
             return Promise.resolve();
@@ -50,7 +50,22 @@ export class Mailer {
         });
     }
 
-    public sendPostNotification(post: DashboardPost, to: string): Promise<any> {
+    public sendThanksForSubscribing(to: string): Promise<any> {
+        const mailOptions: SendMailOptions = {
+            to: to,
+            from: SENDER,
+            bcc: BCC,
+            replyTo: BCC,
+            subject: 'Sucessfully subscribed to SPO Notifier!',
+            html: `<p>Congrats!</p>` +
+                  `<p>You have successfully subscribed to SPO Dashboard Notifications via the SPO Notifier. Now you will receive email notifications each time there's a new post on the SPO dashbord.</p>` +
+                  `<p>Best of Luck!</p>`
+        };
+
+        return this.sendMail(mailOptions);
+    }
+
+    public sendPostNotification(post: DashboardPost, to: string, unsubscribe_link: string): Promise<any> {
         const mailOptions: SendMailOptions = {
             to: to,
             from: SENDER,
@@ -58,7 +73,9 @@ export class Mailer {
             replyTo: BCC,
             subject: post.title,
             html: `<p><b><u>${post.title}</u></b> (Posted On: ${post.date})</p>` +
-                  `<p>${post.body}</p>`
+                  `<p>${post.body}</p>` +
+                  `<p><small>You received this mail beacause you have subscribed to SPO Notifier. To unsubscribe, ` +
+                  `<a href="${ unsubscribe_link }">click here</a>.</small></p>`
         };
 
         return this.sendMail(mailOptions);

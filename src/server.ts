@@ -2,12 +2,13 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import uuid from 'uuid/v4';
+import { Mailer } from './mailer';
 const ssh = new (require('node-ssh'))();
 
 export class Server {
     app: Express;
 
-    constructor(port: number, private db: any) {
+    constructor(port: number, private db: any, private mailer: Mailer) {
         this.app = express();
         this.setupRoutes();
         this.app.listen(port, () =>
@@ -22,7 +23,8 @@ export class Server {
             .use('/', express.static('src/public'))
             .get('/api', this.apiWelcome)
             .get('/posts', this.getPosts)
-            .post('/subscribe', this.checkIITKUser, this.subscribe);
+            .post('/subscribe', this.checkIITKUser, this.subscribe)
+            .get('/unsubscribe', this.unsubscribe);
     }
 
     private httpLogger() {
@@ -81,6 +83,21 @@ export class Server {
             return;
         }
         this.db.get('subscribers').push({ id: uuid(), email: email }).write();
+        this.mailer.sendThanksForSubscribing(email);
+        res.sendStatus(200);
+    }
+
+    private unsubscribe = (req: Request, res: Response) => {
+        if (!req.query.id) {
+            res.sendStatus(400); // Bad Request
+            return;
+        }
+        const sub = (this.db.get('subscribers').find({ id: req.query.id }) as any).value();
+        if (!sub) {
+            res.sendStatus(404) // Not found
+            return;
+        }
+        this.db.get('subscribers').remove({ id: req.query.id }).write();
         res.sendStatus(200);
     }
 }

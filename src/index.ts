@@ -4,7 +4,7 @@ require('dotenv').config();
 import * as request from 'request';
 import * as cheerio from 'cheerio';
 
-import { DashboardPost } from './interfaces';
+import { DashboardPost, Subscriber } from './interfaces';
 import { MailerConfig } from './mailer';
 import { Server } from './server';
 
@@ -19,7 +19,9 @@ const mailer = MailerConfig.setup();
 db.defaults({ posts: [], subscribers: [] })
   .write();
 
-const server = new Server(parseInt(process.env.SERVER_PORT!) || 3000, db);
+const port = parseInt(process.env.SERVER_PORT!) || 3000;
+const host = process.env.SERVER_HOST || (`http://localhost:${port}`);
+const server = new Server(port, db, mailer);
 
 const request_csrf = request.defaults({ jar: request.jar() })
 
@@ -110,14 +112,22 @@ const onUpdatePost = (oldPost: DashboardPost, newPost: DashboardPost) => {
     if (changed) {
         console.log('Update detected in: ' + newPost.title);
         newPost.title = '[Update] ' + newPost.title;
-        mailer.sendPostNotification(newPost, 'abdatta@iitk.ac.in');
+        sendPostNotification(newPost);
     }
 };
 
 const onNewPost = (post: DashboardPost) => {
     console.log('New Post Found:', post.title);
-    mailer.sendPostNotification(post, 'abdatta@iitk.ac.in');
+    sendPostNotification(post);
 };
+
+const sendPostNotification = async (post: DashboardPost)  => {
+    const subs: Subscriber[] = db.get('subscribers').value();
+    for (const sub of subs) {
+        await mailer.sendPostNotification(post, sub.email, `${host}/unsubscribe?id=${encodeURIComponent(sub.id)}`)
+                    .catch((error) => console.error('Send mail error:', error));
+    }
+}
 
 const checkForUpdate = () => {
     console.log(`\nChecking for Updates at [${Date()}]`);
