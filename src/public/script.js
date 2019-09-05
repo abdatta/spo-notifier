@@ -41,7 +41,8 @@ var subsElement = new Vue({
         email: '',
         password: '',
         error: '',
-        subscribing: false
+        subscribing: false,
+        success: false
     },
     methods: {
         init: function() {
@@ -49,6 +50,7 @@ var subsElement = new Vue({
             this.email = '';
             this.password = '';
             this.error = '';
+            this.success = false;
         },
         subscribe: function () {
             if (this.subscribing) {
@@ -69,9 +71,7 @@ var subsElement = new Vue({
                     IITKpassword: this.password
                 },
                 success: function() {
-                    _this.init();
-                    alert('Subscribed sucessfully! Check your email!');
-                    $('.modal').modal('close');
+                    _this.success = true;
                 },
                 error: function(xhr) {
                     _this.subscribing = false;
