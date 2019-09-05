@@ -35,6 +35,10 @@ a:hover {
     text-align: center;
 }
 
+.error {
+    color: red;
+}
+
 i.right.dropdown {
     margin-left: 0;
 }
@@ -79,8 +83,6 @@ i.right.dropdown {
     display: none;
 }
 
-.card .card-action.expand {
-    padding: 12px 24px 16px 24px;
-    max-height: 600px;
-    transition: max-height 1s ease-in;
+.card .card-action a {
+    text-transform: none !important;
 }

@@ -20,13 +20,14 @@
                 <div id="login" class="modal">
                     <div class="modal-content">
                         <h3 class="center">Notfications</h3>
-                        <input id="email" type="text" placeholder="IITK CC username">
+                        <small class="error">{{ error }}</small>
+                        <input type="text" placeholder="IITK CC username" v-model="email" autofocus>
                         <small style="width: 100%">Your email username without '@iitk.ac.in'.</small>
-                        <input id="pass" type="password" placeholder="IITK CC password">
+                        <input type="password" placeholder="IITK CC password" v-model="password" v-on:keyup.enter="subscribe()">
                         <small>We promise we will not store your password anywhere (db, logs, etc.). This is to only verify that the email indeed belongs to you. Still have trust issues? <a href="https://github.com/" target="_blank">Checkout the source code.</a></small>
                     </div>
                     <div class="modal-footer">
-                        <button class="modal-close waves-effect waves-green btn">Subscribe</button>
+                        <button class="waves-effect waves-green btn" v-bind:disabled="subscribing" v-on:click="subscribe()">{{ subscribing ? 'Subscribing...':'Subscribe' }}</button>
                     </div>
                 </div>
             </div>

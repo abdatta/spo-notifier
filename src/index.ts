@@ -16,7 +16,7 @@ const db = require('lowdb')(adapter)
 const mailer = MailerConfig.setup();
 
 // Setting some defaults (required if the db JSON file is empty)
-db.defaults({posts: [] })
+db.defaults({ posts: [], subscribers: [] })
   .write();
 
 const server = new Server(parseInt(process.env.SERVER_PORT!) || 3000, db);

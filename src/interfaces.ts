@@ -3,3 +3,8 @@ export interface DashboardPost {
     date: string;
     body: string;
 }
+
+export interface Subscriber {
+    id: string,
+    email: string
+}

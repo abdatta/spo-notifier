@@ -1,5 +1,8 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
+import bodyParser from 'body-parser';
 import morgan from 'morgan';
+import uuid from 'uuid/v4';
+const ssh = new (require('node-ssh'))();
 
 export class Server {
     app: Express;
@@ -13,10 +16,13 @@ export class Server {
 
     private setupRoutes() {
         this.app
-            .use(this.httpLogger())
+            .use(this.httpLogger()) // use http logger
+            .use(bodyParser.json()) // use json bodyparser
+            .use(bodyParser.urlencoded({ extended: true })) // use query string parser
             .use('/', express.static('src/public'))
             .get('/api', this.apiWelcome)
-            .get('/posts', this.getPosts);
+            .get('/posts', this.getPosts)
+            .post('/subscribe', this.checkIITKUser, this.subscribe);
     }
 
     private httpLogger() {
@@ -24,7 +30,16 @@ export class Server {
             const p = new Date().toString().replace(/[A-Z]{3}\+/,'+').split(/ /);
             return( p[2]+'-'+p[1]+'-'+p[3]+' '+p[4]+' '+p[5] );
         });
-        return morgan('[:date] :method :url :status :response-time ms');
+        morgan.token('payload', (req: Request) => {
+            if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
+                req.body['password'] = undefined;
+                req.body['IITKpassword'] = undefined;
+                return JSON.stringify(req.body);
+            } else {
+                return ' ';
+            }
+        });
+        return morgan('[:date] :method :url :status :response-time ms :payload');
     }
 
     private apiWelcome = (req: Request, res: Response) => {
@@ -33,5 +48,39 @@ export class Server {
 
     private getPosts = (req: Request, res: Response) => {
         res.send(this.db.get('posts').value());
+    }
+
+    private checkIITKUser = (req: Request, res: Response, next: NextFunction) => {
+        ssh.connect({
+            host: 'webhome.cc.iitk.ac.in',
+            username: req.body.IITKusername,
+            password: req.body.IITKpassword
+        })
+        .then(() => {
+            ssh.dispose();
+            next();
+        })
+        .catch((error: any) => {
+            ssh.dispose();
+            if (error.level === 'client-authentication') {
+                res.sendStatus(403); // Forbidden
+            } else if (error.level === 'client-timeout') {
+                res.sendStatus(408); // Request Timeout
+            } else {
+                res.sendStatus(500); // Internal Server Error
+            }
+        });
+        req.body.IITKpassword = undefined; // Removing iitk password immediately after use to prevent logs
+    }
+
+    private subscribe = (req: Request, res: Response) => {
+        const email = `${req.body.IITKusername}@iitk.ac.in`;
+        const exists = (this.db.get('subscribers').find({ email: email }) as any).value();
+        if (exists) {
+            res.sendStatus(409) // Conflict (as subscriber already exists)
+            return;
+        }
+        this.db.get('subscribers').push({ id: uuid(), email: email }).write();
+        res.sendStatus(200);
     }
 }
