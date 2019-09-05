@@ -1,3 +1,7 @@
+$(document).ready(function(){
+    $('.modal').modal();
+});
+
 var postsElement = new Vue({
     el: '#posts',
     data: {
