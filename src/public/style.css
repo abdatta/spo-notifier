@@ -33,6 +33,7 @@ a:hover {
 
 .modal .modal-footer {
     text-align: center;
+    margin-bottom: 6px;
 }
 
 .error {

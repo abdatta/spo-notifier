@@ -98,6 +98,7 @@ export class Server {
             return;
         }
         this.db.get('subscribers').remove({ id: req.query.id }).write();
+        console.log(sub.email + ' unsubscribed from notifications.');
         res.sendStatus(200);
     }
 }

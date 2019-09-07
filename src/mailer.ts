@@ -4,6 +4,7 @@ import { DashboardPost } from './interfaces';
 
 const SENDER = `"${ process.env.MAIL_SENDER }" <notifier@${ process.env.MAIL_HOST }>`;
 const BCC = process.env.MAIL_BCC || '';
+const REPLY_TO = process.env.MAIL_REPLY_TO || BCC || '';
 
 export class MailerConfig {
 
@@ -55,7 +56,7 @@ export class Mailer {
             to: to,
             from: SENDER,
             bcc: BCC,
-            replyTo: BCC,
+            replyTo: REPLY_TO,
             subject: 'Sucessfully subscribed to SPO Notifier!',
             html: `<p>Congrats!</p>` +
                   `<p>You have successfully subscribed to SPO Dashboard Notifications via the SPO Notifier. Now you will receive email notifications each time there's a new post on the SPO dashbord.</p>` +
@@ -70,7 +71,7 @@ export class Mailer {
             to: to,
             from: SENDER,
             bcc: BCC,
-            replyTo: BCC,
+            replyTo: REPLY_TO,
             subject: post.title,
             html: `<p><b><u>${post.title}</u></b> (Posted On: ${post.date})</p>` +
                   `<p>${post.body}</p>` +
