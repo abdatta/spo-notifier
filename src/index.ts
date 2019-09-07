@@ -91,29 +91,26 @@ const dashboard = (req: request.RequestAPI<request.Request, request.CoreOptions,
 }
 
 const onUpdatePost = (oldPost: DashboardPost, newPost: DashboardPost) => {
-    let changed = false;
-    if (oldPost.date !== newPost.date) {
-        const date_diff = differ.main(oldPost.date, newPost.date);
-        differ.cleanupSemantic(date_diff);
-        newPost.date = differ.prettyHtml(date_diff);
-        changed = true;
-    }
-
+    // Extracting only the text from the body which is in html format
     const oldPostBodyContent = cheerio.load(`<body>${oldPost.body}</body>`)('body').text();
     const newPostBodyContent = cheerio.load(`<body>${newPost.body}</body>`)('body').text();
 
-    if (oldPostBodyContent !== newPostBodyContent) {
-        const body_diff = differ.main(oldPostBodyContent, newPostBodyContent);
-        differ.cleanupSemantic(body_diff);
-        newPost.body = differ.prettyHtml(body_diff);
-        changed = true;
+    // Check if the update was in the html tags only, and content was same
+    if (oldPostBodyContent === newPostBodyContent) {
+        // No need to send notifs since only html was updated
+        console.log('Update detected (with only HTML tags) in: ' + newPost.title);
+        console.log('No notification will be sent.');
+        return;
     }
 
-    if (changed) {
-        console.log('Update detected in: ' + newPost.title);
-        newPost.title = '[Update] ' + newPost.title;
-        sendPostNotification(newPost);
-    }
+    console.log('Update detected in: ' + newPost.title);
+    // Detecting the differences with the updated content
+    const body_diff = differ.main(oldPostBodyContent, newPostBodyContent);
+    differ.cleanupSemantic(body_diff);
+    newPost.body = differ.prettyHtml(body_diff); // Marking the detected diferences with html
+    newPost.title = '[Update] ' + newPost.title; // Adding 'update' prefix to title
+
+    sendPostNotification(newPost);
 };
 
 const onNewPost = (post: DashboardPost) => {
@@ -137,16 +134,16 @@ const checkForUpdate = () => {
             let new_count = 0; // count of number of new posts
             let update_count = 0; // count of number of updated posts
             // iterate through each post to check for new or updated ones
-            posts.forEach(post => {
+            posts.reverse().forEach(post => {
                 // check if such a post already exists
-                const exists = (db.get('posts').find({ title: post.title }) as any).value();
+                const exists = (db.get('posts').find({ title: post.title, date: post.date }) as any).value();
                 if (exists) {
-                    // Check for any changes in the existing post object
-                    if (JSON.stringify(exists) !== JSON.stringify(post)) {
+                    // Check for any changes in the existing post body
+                    if (exists.body !== post.body) {
                         // Changes detected, means post has been updated.
                         update_count++; // Increase update count.
-                        // Update post in database
-                        const i = db.get('posts').findIndex({ title: post.title });
+                        // Update post body in database
+                        const i = db.get('posts').findIndex({ title: post.title, date: post.date });
                         db.update(`posts[${i}]`, () => post).write();
                         // Trigger onUpdate pipeline
                         onUpdatePost(exists, post);
