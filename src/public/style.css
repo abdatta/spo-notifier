@@ -1,3 +1,8 @@
+.attachment-full{
+    position: absolute;
+    left: 0;
+}
+
 nav .nav-wrapper {
     padding: 0 20px;
 }
