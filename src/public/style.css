@@ -92,3 +92,13 @@ i.right.dropdown {
 .card .card-action a {
     text-transform: none !important;
 }
+
+.examples {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.examples img {
+    padding: 10px;
+}

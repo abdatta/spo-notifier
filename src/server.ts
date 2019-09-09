@@ -21,8 +21,7 @@ export class Server {
             .use(bodyParser.json()) // use json bodyparser
             .use(bodyParser.urlencoded({ extended: true })) // use query string parser
             .use('/', express.static('src/public'))
-            .get('/api', this.apiWelcome)
-            .get('/posts', this.getPosts)
+            // .get('/posts', this.getPosts) // commented out to prevent public access of posts
             .post('/subscribe', this.checkIITKUser, this.subscribe)
             .get('/unsubscribe', this.unsubscribe);
     }
@@ -41,11 +40,10 @@ export class Server {
                 return ' ';
             }
         });
-        return morgan('[:date] :method :url :status :response-time ms :payload');
-    }
-
-    private apiWelcome = (req: Request, res: Response) => {
-        res.send('Welcome to APIs!');
+        return morgan('[:date] :method :url :status :response-time ms :payload', {
+            // skip unnecessary log of static files
+            skip: (req, res) => { return ['.css', '.js', '.png', '.ico'].some((ext) => req.path.includes(ext)) }
+        });
     }
 
     private getPosts = (req: Request, res: Response) => {
@@ -83,6 +81,7 @@ export class Server {
             return;
         }
         this.db.get('subscribers').push({ id: uuid(), email: email }).write();
+        console.log(email + ' subscribed to notifications.');
         this.mailer.sendThanksForSubscribing(email);
         res.sendStatus(200);
     }

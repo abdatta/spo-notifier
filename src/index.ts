@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 
 import * as request from 'request';
@@ -23,6 +22,7 @@ const port = parseInt(process.env.SERVER_PORT!) || 3000;
 const host = process.env.SERVER_HOST || (`http://localhost:${port}`);
 const server = new Server(port, db, mailer);
 
+// Setting persistent session as default to prevent multiple logins
 const request_csrf = request.defaults({ jar: request.jar() })
 
 const login = (req: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>): Promise<void> => {
