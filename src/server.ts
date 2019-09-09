@@ -21,6 +21,7 @@ export class Server {
             .use(bodyParser.json()) // use json bodyparser
             .use(bodyParser.urlencoded({ extended: true })) // use query string parser
             .use('/', express.static('src/public'))
+            .get('/subcount', this.getSubscriberCount)
             // .get('/posts', this.getPosts) // commented out to prevent public access of posts
             .post('/subscribe', this.checkIITKUser, this.subscribe)
             .get('/unsubscribe', this.unsubscribe);
@@ -46,8 +47,9 @@ export class Server {
         });
     }
 
-    private getPosts = (req: Request, res: Response) => {
-        res.send(this.db.get('posts').value());
+    private getSubscriberCount = (req: Request, res: Response) => {
+        const subs = this.db.get('subscribers').value();
+        res.send({ count: (subs ? subs.length : 0) });
     }
 
     private checkIITKUser = (req: Request, res: Response, next: NextFunction) => {

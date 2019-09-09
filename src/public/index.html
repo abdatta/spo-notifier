@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link href="style.css" rel="stylesheet">
+        <link href="style.css?v=1" rel="stylesheet">
     </head>
     <body>
         <a href="https://github.com/abdatta/spo-notifier" target="_blank">
@@ -14,7 +14,7 @@
         <nav>
             <div class="nav-wrapper">
                 <div class="brand-logo center">SPO Notifier</div>
-                <a class="right" href="https://www.fb.com/AboutRohan" target="_blank" rel="no-opener">by Abhishek Datta</a>
+                <a class="right" href="https://www.fb.com/AboutRohan" target="_blank" rel="noopener">by Abhishek Datta</a>
             </div>
         </nav>
         <div class="container">
@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <br>
+            <div style="text-align: center" id="subcount"><small><b>{{ count ? count+' people have already subscribed!':'' }}</b></small></div>
             <!-- <div class="row" id="posts">
                 <div class="post" v-for="(post, i) in posts">
                     <div class="card blue-grey darken-1">
@@ -67,13 +67,13 @@
                 <h5>Also, this is open source, so you can see the code, fork it and contribute your own cents for the help of the campus community.</h5>
             </div>
             <div class="examples">
-                <img class="materialboxed" height="300" src="dashboard.png">
-                <img class="materialboxed" height="300" src="notification.png">
+                <img class="materialboxed" src="dashboard.png">
+                <img class="materialboxed" src="notification.png">
             </div>
             <div>
-                    <h5 style="text-align: center">Disclaimers:</h5>
-                    <h5>1. This site is made by me <a href="https://www.fb.com/AboutRohan" target="_blank" rel="no-opener">(Abhishek Datta)</a>, and has no role of the SPO.</h5>
-                    <h5>2. This checks for new posts only at certain intervals (currently it is once every hour - <a href="http://m.me/AboutRohan" target="_blank">message me</a> if you want it to be more frequent), so don't be over-dependent on this if you have some urgent news awaiting.</h5>
+                <h5 style="text-align: center">Disclaimers:</h5>
+                <h5>1. This site is made by me <a href="https://www.fb.com/AboutRohan" target="_blank" rel="noopener">(Abhishek Datta)</a>, and has no role of the SPO.</h5>
+                <h5>2. This checks for new posts only at certain intervals (currently it is once every hour - <a href="http://m.me/AboutRohan" target="_blank" rel="noopener">message me</a> if you want it to be more frequent), so don't be over-dependent on this if you have some urgent news awaiting.</h5>
             </div>
         </div>
         
@@ -81,5 +81,5 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js?v=1"></script>
 </html>

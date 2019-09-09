@@ -26,6 +26,30 @@ $(document).ready(function(){
 //       }
 // })
 
+var subcountElement = new Vue({
+    el: '#subcount',
+    data: {
+        count: null
+    },
+    mounted() {
+        this.init();
+    },
+    methods: {
+        init: function() {
+            const _this = this;
+            $.ajax({
+                url: "/subcount",
+                success: function(subscount) {
+                    _this.count = subscount.count;
+                },
+                error: function(xhr,status,error) {
+                    console.log(error);
+                }
+            });
+        }
+    }
+})
+
 // $.ajax({
 //     url: "/posts",
 //     success: function(posts) {
@@ -73,6 +97,7 @@ var subsElement = new Vue({
                 },
                 success: function() {
                     _this.success = true;
+                    subcountElement.init();
                 },
                 error: function(xhr) {
                     _this.subscribing = false;

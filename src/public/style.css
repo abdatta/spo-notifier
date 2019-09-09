@@ -101,4 +101,6 @@ i.right.dropdown {
 
 .examples img {
     padding: 10px;
+    max-height: 300px;
+    max-width: 100%;
 }
