@@ -136,18 +136,19 @@ const checkForUpdate = () => {
             // iterate through each post to check for new or updated ones
             posts.reverse().forEach(post => {
                 // check if such a post already exists
-                const exists = (db.get('posts').find({ title: post.title, date: post.date }) as any).value();
+                const exists = (db.get('posts').find(post) as any).value();
                 if (exists) {
-                    // Check for any changes in the existing post body
-                    if (exists.body !== post.body) {
-                        // Changes detected, means post has been updated.
-                        update_count++; // Increase update count.
-                        // Update post body in database
-                        const i = db.get('posts').findIndex({ title: post.title, date: post.date });
-                        db.update(`posts[${i}]`, () => post).write();
-                        // Trigger onUpdate pipeline
-                        onUpdatePost(exists, post);
-                    }
+                    /* Update existing posts is disabled as it is not found to be much useful, and was causing spam! */
+                    // // Check for any changes in the existing post body
+                    // if (exists.body !== post.body) {
+                    //     // Changes detected, means post has been updated.
+                    //     update_count++; // Increase update count.
+                    //     // Update post body in database
+                    //     const i = db.get('posts').findIndex({ title: post.title, date: post.date });
+                    //     db.update(`posts[${i}]`, () => post).write();
+                    //     // Trigger onUpdate pipeline
+                    //     onUpdatePost(exists, post);
+                    // }
                     return;
                 }
                 // Code reaches here means new post found.
