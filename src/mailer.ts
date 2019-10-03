@@ -66,17 +66,23 @@ export class Mailer {
         return this.sendMail(mailOptions);
     }
 
-    public sendPostNotification(post: DashboardPost, to: string, unsubscribe_link: string): Promise<any> {
+    public sendPostDigest(posts: DashboardPost[], to: string, unsubscribe_link: string): Promise<any> {
         const mailOptions: SendMailOptions = {
             to: to,
             from: SENDER,
             bcc: BCC,
             replyTo: REPLY_TO,
-            subject: post.title,
-            html: `<p><b><u>${post.title}</u></b> (Posted On: ${post.date})</p>` +
-                  `<p>${post.body}</p>` +
-                  `<p><small>You received this mail beacause you have subscribed to SPO Notifier. To unsubscribe, ` +
-                  `<a href="${ unsubscribe_link }">click here</a>.</small></p>`
+            subject: `${posts.length} New Update${posts.length==1?'':'s'} on SPO Dashboard`,
+            html:   `There has been <b>${posts.length} new update${posts.length==1?'':'s'}</b> on the <a href="https://placement.iitk.ac.in/dashboard/">SPO Dashboard</a>.` +
+                    `<br>` +
+                    posts.map((post, i) =>
+                        `<div class="new-post">` +
+                            `<p><b>${i+1}. <u>${post.title}</u></b><br>&emsp;[Posted On: ${post.date}]</p>` +
+                            `<blockquote>${post.body}</blockquote>` +
+                        `</div>`
+                    ).join(`<br>`) +
+                    `<p><small>You received this mail beacause you have subscribed to <a href="https://spoii.tk/">SPO Notifier</a>. To unsubscribe, ` +
+                    `<a href="${ unsubscribe_link }">click here</a>.</small></p>`
         };
 
         return this.sendMail(mailOptions);
@@ -84,8 +90,9 @@ export class Mailer {
 
     private readonly HEADER = `<html><head>` +
                                 `<style>` +
-                                    `ins { background-color: lightgreen; font-weight: 600; }` +
-                                    `del { background-color: lightpink; font-weight: 600; }` +
+                                    `.new-post {` +
+                                        `border-bottom: 1px #c0c0c0 solid;` +
+                                    `}` +
                                 `</style>` +
                                `</head>` +
                                `<body>`;

@@ -22,7 +22,6 @@ export class Server {
             .use(bodyParser.urlencoded({ extended: true })) // use query string parser
             .use('/', express.static('src/public'))
             .get('/subcount', this.getSubscriberCount)
-            // .get('/posts', this.getPosts) // commented out to prevent public access of posts
             .post('/subscribe', this.checkIITKUser, this.subscribe)
             .get('/unsubscribe', this.unsubscribe);
     }

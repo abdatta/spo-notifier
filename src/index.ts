@@ -90,41 +90,14 @@ const dashboard = (req: request.RequestAPI<request.Request, request.CoreOptions,
     })
 }
 
-const onUpdatePost = (oldPost: DashboardPost, newPost: DashboardPost) => {
-    // Extracting only the text from the body which is in html format
-    const oldPostBodyContent = cheerio.load(`<body>${oldPost.body}</body>`)('body').text();
-    const newPostBodyContent = cheerio.load(`<body>${newPost.body}</body>`)('body').text();
-
-    // Check if the update was in the html tags only, and content was same
-    if (oldPostBodyContent === newPostBodyContent) {
-        // No need to send notifs since only html was updated
-        console.log('Update detected (with only HTML tags) in: ' + newPost.title);
-        console.log('No notification will be sent.');
-        return;
-    }
-
-    console.log('Update detected in: ' + newPost.title);
-    // Detecting the differences with the updated content
-    const body_diff = differ.main(oldPostBodyContent, newPostBodyContent);
-    differ.cleanupSemantic(body_diff);
-    newPost.body = differ.prettyHtml(body_diff); // Marking the detected diferences with html
-    newPost.title = '[Update] ' + newPost.title; // Adding 'update' prefix to title
-
-    sendPostNotification(newPost);
-};
-
-const onNewPost = (post: DashboardPost) => {
-    console.log('New Post Found:', post.title);
-    sendPostNotification(post);
-};
-
-const sendPostNotification = async (post: DashboardPost)  => {
+const sendPostsDigest = async (posts: DashboardPost[]) => {
+    posts.forEach(post => console.log('New Post Found:', post.title));
     const subs: Subscriber[] = db.get('subscribers').value();
     for (const sub of subs) {
-        await mailer.sendPostNotification(post, sub.email, `${host}/unsubscribe?id=${encodeURIComponent(sub.id)}`)
+        await mailer.sendPostDigest(posts, sub.email, `${host}/unsubscribe?id=${encodeURIComponent(sub.id)}`)
                     .catch((error) => console.error('Send mail error:', error));
     }
-}
+};
 
 const checkForUpdate = () => {
     console.log(`\nChecking for Updates at [${Date()}]`);
@@ -133,33 +106,17 @@ const checkForUpdate = () => {
         .then(posts => {
             let new_count = 0; // count of number of new posts
             let update_count = 0; // count of number of updated posts
-            // iterate through each post to check for new or updated ones
-            posts.reverse().forEach(post => {
-                // check if such a post already exists
-                const exists = (db.get('posts').find(post) as any).value();
-                if (exists) {
-                    /* Update existing posts is disabled as it is not found to be much useful, and was causing spam! */
-                    // // Check for any changes in the existing post body
-                    // if (exists.body !== post.body) {
-                    //     // Changes detected, means post has been updated.
-                    //     update_count++; // Increase update count.
-                    //     // Update post body in database
-                    //     const i = db.get('posts').findIndex({ title: post.title, date: post.date });
-                    //     db.update(`posts[${i}]`, () => post).write();
-                    //     // Trigger onUpdate pipeline
-                    //     onUpdatePost(exists, post);
-                    // }
-                    return;
-                }
-                // Code reaches here means new post found.
-                new_count++; // Increase new post count
-                // Add new post in database
-                db.get('posts').push(post).write();
-                // Trigger onNewPost pipeline
-                onNewPost(post);
-            });
+            // Filters new posts that do not exist in db
+            const new_posts = posts.filter(post => !(db.get('posts').find(post) as any).value());
+            //If new posts are found
+            if (new_posts.length > 0) {
+                // Add new posts to database
+                db.get('posts').push(...new_posts.slice().reverse()).write();
+                // Send digest mails on new Posts
+                sendPostsDigest(new_posts);
+            }
             // Print the final verdict of this scraping.
-            console.log(`Verdict: ${new_count} new post${new_count-1?'s':''} found. ${update_count} old post${update_count-1?'s':''} updated.\n`)
+            console.log(`Verdict: ${new_posts.length} new post${new_count-1?'s':''} found.\n`);
         })
         .catch(error => console.error('Failed to check for updates!', error));
 }
