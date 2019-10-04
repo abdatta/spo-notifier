@@ -8,3 +8,9 @@ export interface Subscriber {
     id: string,
     email: string
 }
+
+export interface JobOpening {
+    id: string;
+    company: string;
+    profile: string;
+}

@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import uuid from 'uuid/v4';
+import index from 'serve-index';
 import { Mailer } from './mailer';
 const ssh = new (require('node-ssh'))();
 
@@ -20,7 +21,11 @@ export class Server {
             .use(this.httpLogger()) // use http logger
             .use(bodyParser.json()) // use json bodyparser
             .use(bodyParser.urlencoded({ extended: true })) // use query string parser
+            // serve static frontend
             .use('/', express.static('src/public'))
+            // jobs archive directory listing
+            .use('/archive', express.static('archive'), index('archive', {'icons': true}))
+            // API end point routes
             .get('/subcount', this.getSubscriberCount)
             .post('/subscribe', this.checkIITKUser, this.subscribe)
             .get('/unsubscribe', this.unsubscribe);
